@@ -7,8 +7,17 @@ IRrecv irrecv(IR);
 decode_results results ; 
 #define plus 16754775
 #define minus 16769055 
+#define one 16724175 // number 1 
+#define two 16718055 // number 2
+#define three 16743045 // number 3
+#define four 16716015 // number 4
+#define five 16726215 // number 5
 int p=0;
 int gripperState = 0;
+int wristState=0;
+int elbowState=0;
+int shoulderState=0;
+int baseState=0;
 Servo base ;
 Servo shoulder ;
 Servo elbow ;
@@ -19,18 +28,6 @@ double shoulder_angle=90;
 double elbow_angle=90;
 double wrist_angle=90;
 double gripper_angle=0;
-String data;
-String data1;
-String data2;
-String data3;
-double angle1;
-double angle2;
-double angle3;
-double angle4;
-double prev_base_angle=90;
-double prev_shoulder_angle=90;
-double prev_elbow_angle=90;
-double prev_wrist_angle=90;
 void setup() {
 irrecv.enableIRIn(); 
 Serial.begin(9600);
@@ -53,36 +50,136 @@ void loop() {
 if(irrecv.decode(&results))
 {
   unsigned int value = results.value;
-  switch (value) {
-    case plus:
-    if(wrist_angle <= 90 && elbow_angle<= 90&&shoulder_angle<= 90&&base_angle <= 90 ){
-       p+=10;
+ switch (value) {
+  case one :
+  Serial.println("wrist");
+  wristState = 1 ; 
+  elbowState=0;
+  baseState=0;
+  shoulderState=0;
+  break;
+  case two : 
+   Serial.println("elbow");
+  wristState = 0 ; 
+  elbowState=1;
+  baseState=0;
+  shoulderState=0;
+    break;     
+  case three : 
+     Serial.println("shoulder");
+  wristState = 0 ; 
+  elbowState=0;
+  shoulderState=1;
+  baseState=0;
+  
+    break; 
+    
+   case four : 
+       Serial.println("base");
+  wristState = 0 ; 
+  elbowState=0;
+  shoulderState=0;
+  baseState=1;
+    break; 
+// you can add more case for more remote control 
+
+ }
+ if (wristState == 1 ) {
+   switch (value) {
+    case plus : 
+    if(wrist_angle <= 90 ){
+       if ( p < 180 )  p+=10; // you can change the number of movement for angle  
        for(i = q ; i<=p; i++) {
-       base.write(i); 
-       shoulder.write(i);
-       elbow.write(i);
        wrist.write(i);}
        Serial.println(i);
        q = p;
        delay(15);
     }
     break;
-    case minus:
-    if(wrist_angle >= 0 && wrist_angle <180 && elbow_angle>= 0&&elbow_angle<180 && shoulder_angle>= 0&&shoulder_angle<180 &&base_angle >= 0 &&base_angle <180 ){
-      p-= 10;
+    case minus : 
+    if(wrist_angle >= 0 && wrist_angle <180){
+      if(p>=1) p-= 10; // you can change the number of movement for angle 
       for( i = q ; i>=p; i--) {
-       base.write(i); 
-       shoulder.write(i);
-       elbow.write(i);
        wrist.write(i);}
        Serial.println(i);
        q = p;
        delay(15);
     }
-    break; 
-    // you can add more case for more options like number 1 or 0 ... 
-    
-  }
+  break ;  
+   }
+ }
+  if (elbowState == 1 ) {
+   switch (value) {
+    case plus : 
+    if(elbow_angle <= 90 ){
+       if ( p < 180 )  p+=10; // you can change the number of movement for angle 
+       for(i = q ; i<=p; i++) {
+       elbow.write(i);}
+       Serial.println(i);
+       q = p;
+       delay(15);
+    }
+    break;
+    case minus : 
+    if(elbow_angle >= 0 && elbow_angle <180){
+      if(p>=1) p-= 10; // you can change the number of movement for angle 
+      for( i = q ; i>=p; i--) {
+       elbow.write(i);}
+       Serial.println(i);
+       q = p;
+       delay(15);
+    }
+  break ;  
+   }
+ } if (shoulderState == 1 ) {
+   switch (value) {
+    case plus : 
+    if(shoulder_angle <= 90 ){
+       if ( p < 180 )  p+=10; // you can change the number of movement for angle 
+       for(i = q ; i<=p; i++) {
+       shoulder.write(i);}
+       Serial.println(i);
+       q = p;
+       delay(15);
+    }
+    break;
+    case minus : 
+    if(shoulder_angle >= 0 && shoulder_angle <180){
+      if(p>=1) p-= 10; // you can change the number of movement for angle 
+      for( i = q ; i>=p; i--) {
+      shoulder.write(i);}
+       Serial.println(i);
+       q = p;
+       delay(15);
+    }
+  break ;  
+   }
+ } 
+ if (baseState == 1 ) {
+   switch (value) {
+    case plus : 
+    if(base_angle <= 90 ){
+      if ( p < 180 )  p+=10;// you can change the number of movement for angle 
+       for(i = q ; i<=p; i++) {
+       base.write(i);}
+       Serial.println(i);
+       q = p;
+       delay(15);
+    }
+    break;
+    case minus : 
+    if(base_angle >= 0 && base_angle <180){
+      if(p>=1) p-= 10; // you can change the number of movement for angle 
+      for( i = q ; i>=p; i--) {
+       base.write(i);}
+       Serial.println(i);
+       q = p;
+       delay(15);
+    }
+  break ;  
+   }
+
+ }
     switch (gripperState){
       case 0 :
       gripper.write(60);
